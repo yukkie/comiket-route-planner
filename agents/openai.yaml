@@ -1,0 +1,4 @@
+interface:
+  display_name: "コミケ巡回プランナー"
+  short_description: "参加サークルを収集し、購入計画と当日巡回リストを作成"
+  default_prompt: "Use $comiket-route-planner to create or update my Comiket purchase and route plan."

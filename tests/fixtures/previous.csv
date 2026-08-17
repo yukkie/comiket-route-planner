@@ -1,0 +1,4 @@
+サークル名,作家名,配置,優先度,一言ジャンル,訪問状態,購入予定,価格,購入状態,メモ
+Alice Garden,Alice,東A34a,A,創作,未訪問,C110新刊,"1,000円",buy,最優先
+Alice Garden,Alice,東A34a,A,創作,未訪問,アクリル小物,,candidate,最優先
+Bob Books,Bob,西B12b,B,評論,未訪問,新刊,500,candidate,

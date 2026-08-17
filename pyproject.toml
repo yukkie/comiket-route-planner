@@ -1,0 +1,22 @@
+[project]
+name = "comiket-route-planner"
+version = "0.1.0"
+description = "Local-first Comiket visit, purchase, budget, and event-day planner"
+requires-python = ">=3.10"
+dependencies = [
+    "jinja2>=3.1.6",
+    "pydantic>=2.13.4",
+]
+
+[project.scripts]
+comiket-plan = "comiket_planner.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+[tool.uv.build-backend]
+module-name = "comiket_planner"

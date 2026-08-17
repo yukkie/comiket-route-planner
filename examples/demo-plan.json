@@ -1,0 +1,173 @@
+{
+  "schema_version": "0.1.0",
+  "event": {
+    "event_id": "demo-day1",
+    "name": "コミケ巡回プランナー デモ",
+    "day": 1,
+    "event_date": null,
+    "map_source_id": null
+  },
+  "circles": [
+    {
+      "visit_id": "b40bb6a3-1c5e-5dba-b647-0b5472896514",
+      "circle_name": "Alice Garden",
+      "creator_name": "Alice",
+      "aliases": [],
+      "x_user_id": null,
+      "x_handle": null,
+      "space_code": "東A34a",
+      "hall": null,
+      "placement_type": "unknown",
+      "priority": "A",
+      "genre_short": "創作",
+      "visit_status": "unvisited",
+      "notes": "最優先",
+      "items": [
+        {
+          "item_id": "2af96dfd-a868-5d4d-be96-b7eb019f593b",
+          "name": "C110新刊",
+          "variant": null,
+          "price": 1000,
+          "currency": "JPY",
+          "purchase_state": "candidate",
+          "availability": "unknown",
+          "age_rating": "unknown",
+          "bundle_components": [],
+          "source_refs": [
+            {
+              "source_id": "previous_list-ab5a4e3c368264fc",
+              "type": "previous_list",
+              "locator": "tests\\fixtures\\previous.csv",
+              "captured_at": "2026-08-17T19:00:05+09:00",
+              "content_hash": "ab5a4e3c368264fcc760daffeec3042ae7c66e0e21dde55f4868f5f69263d071"
+            }
+          ]
+        },
+        {
+          "item_id": "538a34b7-d9ce-593e-a14c-03732f7fbd2b",
+          "name": "アクリル小物",
+          "variant": null,
+          "price": null,
+          "currency": "JPY",
+          "purchase_state": "candidate",
+          "availability": "unknown",
+          "age_rating": "unknown",
+          "bundle_components": [],
+          "source_refs": [
+            {
+              "source_id": "previous_list-ab5a4e3c368264fc",
+              "type": "previous_list",
+              "locator": "tests\\fixtures\\previous.csv",
+              "captured_at": "2026-08-17T19:00:05+09:00",
+              "content_hash": "ab5a4e3c368264fcc760daffeec3042ae7c66e0e21dde55f4868f5f69263d071"
+            }
+          ]
+        }
+      ],
+      "field_meta": {
+        "priority": {
+          "origin": "previous_list",
+          "confidence": 1.0,
+          "manually_confirmed": true,
+          "updated_at": "2026-08-17T19:00:05+09:00"
+        },
+        "genre_short": {
+          "origin": "previous_list",
+          "confidence": 1.0,
+          "manually_confirmed": true,
+          "updated_at": "2026-08-17T19:00:05+09:00"
+        },
+        "notes": {
+          "origin": "previous_list",
+          "confidence": 1.0,
+          "manually_confirmed": true,
+          "updated_at": "2026-08-17T19:00:05+09:00"
+        }
+      },
+      "source_refs": [
+        {
+          "source_id": "previous_list-ab5a4e3c368264fc",
+          "type": "previous_list",
+          "locator": "tests\\fixtures\\previous.csv",
+          "captured_at": "2026-08-17T19:00:05+09:00",
+          "content_hash": "ab5a4e3c368264fcc760daffeec3042ae7c66e0e21dde55f4868f5f69263d071"
+        }
+      ]
+    },
+    {
+      "visit_id": "8a407976-e186-517a-8649-9d2e4048fce8",
+      "circle_name": "Bob Books",
+      "creator_name": "Bob",
+      "aliases": [],
+      "x_user_id": null,
+      "x_handle": null,
+      "space_code": "西B12b",
+      "hall": null,
+      "placement_type": "unknown",
+      "priority": "B",
+      "genre_short": "評論",
+      "visit_status": "unvisited",
+      "notes": "",
+      "items": [
+        {
+          "item_id": "ad06920c-b368-58bb-bf22-71fab055b5e0",
+          "name": "新刊",
+          "variant": null,
+          "price": 500,
+          "currency": "JPY",
+          "purchase_state": "candidate",
+          "availability": "unknown",
+          "age_rating": "unknown",
+          "bundle_components": [],
+          "source_refs": [
+            {
+              "source_id": "previous_list-ab5a4e3c368264fc",
+              "type": "previous_list",
+              "locator": "tests\\fixtures\\previous.csv",
+              "captured_at": "2026-08-17T19:00:05+09:00",
+              "content_hash": "ab5a4e3c368264fcc760daffeec3042ae7c66e0e21dde55f4868f5f69263d071"
+            }
+          ]
+        }
+      ],
+      "field_meta": {
+        "priority": {
+          "origin": "previous_list",
+          "confidence": 1.0,
+          "manually_confirmed": true,
+          "updated_at": "2026-08-17T19:00:05+09:00"
+        },
+        "genre_short": {
+          "origin": "previous_list",
+          "confidence": 1.0,
+          "manually_confirmed": true,
+          "updated_at": "2026-08-17T19:00:05+09:00"
+        }
+      },
+      "source_refs": [
+        {
+          "source_id": "previous_list-ab5a4e3c368264fc",
+          "type": "previous_list",
+          "locator": "tests\\fixtures\\previous.csv",
+          "captured_at": "2026-08-17T19:00:05+09:00",
+          "content_hash": "ab5a4e3c368264fcc760daffeec3042ae7c66e0e21dde55f4868f5f69263d071"
+        }
+      ]
+    }
+  ],
+  "budget": {
+    "planned_total": 0,
+    "max_total": 1500,
+    "unknown_price_buy_count": 0,
+    "unknown_price_candidate_count": 1,
+    "unknown_price_items": [
+      {
+        "visit_id": "b40bb6a3-1c5e-5dba-b647-0b5472896514",
+        "circle_name": "Alice Garden",
+        "item_name": "アクリル小物",
+        "purchase_state": "candidate"
+      }
+    ]
+  },
+  "generated_at": "2026-08-17T19:00:05+09:00"
+}
