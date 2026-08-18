@@ -19,7 +19,13 @@ class ImporterTests(unittest.TestCase):
         parsed = parse_profile_event_fields("こまち.小丁C108日曜南A04", "C108")
         self.assertEqual(parsed["creator_name"], "こまち.小丁")
         self.assertEqual(parsed["event_day"], 2)
+        self.assertEqual(parsed["hall"], "南（番号不明）")
         self.assertEqual(parsed["space_code"], "A-04")
+
+    def test_profile_event_fields_keep_direction_when_hall_number_is_missing(self):
+        parsed = parse_profile_event_fields("ツリサス@C108(日)東タ－17b", "C108")
+        self.assertEqual(parsed["hall"], "東（番号不明）")
+        self.assertEqual(parsed["space_code"], "タ-17b")
 
     def test_normalize_x_handle_accepts_urls_and_mentions(self):
         self.assertEqual(normalize_x_handle("https://x.com/Example_1"), "Example_1")
@@ -71,6 +77,12 @@ class ImporterTests(unittest.TestCase):
         self.assertEqual(stats["matched_handles"], 1)
         self.assertEqual(enriched[0]["priority"], "A")
         self.assertEqual(enriched[0]["event_day"], 2)
+
+    def test_rehearsal_prefers_previous_exact_hall_over_direction_only(self):
+        candidates = [{"creator_name": "Creator", "x_handle": "same", "priority": "unassigned", "genre_short": "", "hall": "西（番号不明）", "field_meta": {}}]
+        previous = [{"creator_name": "Creator", "x_handle": "same", "priority": "unassigned", "genre_short": "", "hall": "西2", "source_refs": []}]
+        enriched, _ = enrich_with_previous(candidates, previous, carry_placement=True)
+        self.assertEqual(enriched[0]["hall"], "西2")
 
     def test_previous_only_entry_is_reset_for_new_event(self):
         previous = [{

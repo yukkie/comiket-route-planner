@@ -14,3 +14,4 @@ data/raw/
 data/derived/
 data/events/
 data/*.json
+data/*.pdf

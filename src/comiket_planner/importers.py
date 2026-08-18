@@ -81,7 +81,11 @@ def parse_profile_event_fields(display_name: str, event_pattern: str | None) -> 
         day = 2
 
     hall_match = re.search(r"(東|西|南)\s*([1-8])(?:\s*ホール)?", event_text)
-    hall = f"{hall_match.group(1)}{hall_match.group(2)}" if hall_match else None
+    if hall_match:
+        hall = f"{hall_match.group(1)}{hall_match.group(2)}"
+    else:
+        direction_match = re.search(r"(東|西|南)", event_text)
+        hall = f"{direction_match.group(1)}（番号不明）" if direction_match else None
 
     space = None
     sided = re.search(r"([ァ-ヶぁ-んA-Za-z])\s*[-－ー]?\s*(\d{1,2})\s*[-－ー]?\s*([abAB]{1,2})", event_text)
@@ -299,7 +303,10 @@ def enrich_with_previous(
             enriched_fields += 1
         if carry_placement:
             for field in ("event_day", "hall", "space_code"):
-                if current.get(field) in (None, "") and old.get(field) not in (None, ""):
+                current_value = current.get(field)
+                prior_value = old.get(field)
+                hall_direction_only = field == "hall" and str(current_value or "").endswith("（番号不明）")
+                if (current_value in (None, "") or hall_direction_only) and prior_value not in (None, ""):
                     current[field] = old[field]
                     current.setdefault("field_meta", {})[field] = {
                         "origin": "previous_list_rehearsal",
