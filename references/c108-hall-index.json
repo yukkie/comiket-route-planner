@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "event_id": "C108",
+  "derived_from": [
+    {
+      "file": "C108Map_e123_B4.pdf",
+      "sha256": "381c6a3b90a15fa4a9173edd69d9cd5e8dacdc292010bc7e8d92b614bb35a02d",
+      "page": 1
+    },
+    {
+      "file": "C108Map_e7_B4.pdf",
+      "sha256": "5d061ffa11a3be7cbaf51f8665a9ddc265c91ff77e77382617f8ec82a784e2a4",
+      "page": 1
+    },
+    {
+      "file": "C108Map_s12_B4.pdf",
+      "sha256": "b397b430375b6b1bcdfc86e63ad18de03d7c0a5a30454cf69673478c4f1ec289",
+      "page": 1
+    },
+    {
+      "file": "C108Map_w12_B4.pdf",
+      "sha256": "cb99531b482b354fc0b0de5558bb46dc955c1a313b20afcee860f559f47602ab",
+      "page": 1
+    }
+  ],
+  "rules": [
+    {"area": "東", "hall": "東1", "blocks": ["イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス"], "number_min": 1, "number_max": 99},
+    {"area": "東", "hall": "東1", "blocks": ["ア"], "number_min": 1, "number_max": 22},
+    {"area": "東", "hall": "東2", "blocks": ["セ", "ソ", "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ"], "number_min": 1, "number_max": 99},
+    {"area": "東", "hall": "東3", "blocks": ["フ", "ヘ", "ホ", "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ"], "number_min": 1, "number_max": 99},
+    {"area": "東", "hall": "東3", "blocks": ["ア"], "number_min": 74, "number_max": 92},
+    {"area": "東", "hall": "東7", "blocks": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W"], "number_min": 1, "number_max": 99},
+    {"area": "南", "hall": "南1", "blocks": ["j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t"], "number_min": 1, "number_max": 99},
+    {"area": "南", "hall": "南2", "blocks": ["a", "b", "c", "d", "e", "f", "g", "h", "i"], "number_min": 1, "number_max": 99},
+    {"area": "西", "hall": "西1", "blocks": ["て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", "ま", "み", "む", "め"], "number_min": 1, "number_max": 99},
+    {"area": "西", "hall": "西2", "blocks": ["あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た", "ち"], "number_min": 1, "number_max": 99}
+  ]
+}

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .core import calculate_budget, load_json, merge_plans, new_plan, save_json, validate_plan
 from .exporters import export_csv, export_html
+from .hall_index import apply_hall_index, load_hall_index
 from .importers import append_previous_only, enrich_with_previous, import_follow_lists, import_previous
 
 
@@ -24,6 +25,7 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--profile-pattern", help="only include profiles whose name/description matches this regex")
     build.add_argument("--include-previous-only", action="store_true", help="append prior-list entries absent from filtered profiles")
     build.add_argument("--carry-previous-placement", action="store_true", help="rehearsal only: copy prior day/hall/space when current profile lacks them")
+    build.add_argument("--hall-index", help="event-specific map-derived JSON used to resolve exact halls")
     build.add_argument("--output", required=True)
     build.add_argument("--report")
     reconcile = commands.add_parser("reconcile", help="merge an incoming EventPlan")
@@ -50,10 +52,11 @@ def main(argv: list[str] | None = None) -> int:
         previous_only_added = 0
         if args.include_previous_only:
             circles, previous_only_added = append_previous_only(circles, previous_circles, args.event_id, args.carry_previous_placement)
+        hall_stats = apply_hall_index(circles, load_hall_index(args.hall_index)) if args.hall_index else None
         plan["circles"] = circles
         plan["budget"] = calculate_budget(circles)
         save_json(args.output, plan)
-        report = {"follow": follow_stats, "previous": previous_stats, "previous_only_added": previous_only_added, "output_records": len(circles)}
+        report = {"follow": follow_stats, "previous": previous_stats, "previous_only_added": previous_only_added, "hall_index": hall_stats, "output_records": len(circles)}
         rendered = json.dumps(report, ensure_ascii=False, indent=2)
         if args.report:
             Path(args.report).parent.mkdir(parents=True, exist_ok=True)
