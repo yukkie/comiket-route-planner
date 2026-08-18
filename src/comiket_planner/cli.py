@@ -23,6 +23,7 @@ def parser() -> argparse.ArgumentParser:
     build.add_argument("--previous", required=True, help="previous Notion export as JSON/CSV")
     build.add_argument("--profile-pattern", help="only include profiles whose name/description matches this regex")
     build.add_argument("--include-previous-only", action="store_true", help="append prior-list entries absent from filtered profiles")
+    build.add_argument("--carry-previous-placement", action="store_true", help="rehearsal only: copy prior day/hall/space when current profile lacks them")
     build.add_argument("--output", required=True)
     build.add_argument("--report")
     reconcile = commands.add_parser("reconcile", help="merge an incoming EventPlan")
@@ -45,10 +46,10 @@ def main(argv: list[str] | None = None) -> int:
         plan = new_plan(args.event_id)
         candidates, follow_stats = import_follow_lists(args.follow, args.event_id, args.profile_pattern)
         previous_circles = import_previous(args.previous, args.event_id)
-        circles, previous_stats = enrich_with_previous(candidates, previous_circles)
+        circles, previous_stats = enrich_with_previous(candidates, previous_circles, args.carry_previous_placement)
         previous_only_added = 0
         if args.include_previous_only:
-            circles, previous_only_added = append_previous_only(circles, previous_circles, args.event_id)
+            circles, previous_only_added = append_previous_only(circles, previous_circles, args.event_id, args.carry_previous_placement)
         plan["circles"] = circles
         plan["budget"] = calculate_budget(circles)
         save_json(args.output, plan)

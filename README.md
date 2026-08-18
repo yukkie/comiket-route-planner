@@ -297,7 +297,7 @@ uv run comiket-plan validate `
   --report data/derived/EVENT-day1-review.json
 ```
 
-提供済みフォローJSONと前回Notion取得JSONから仮想C109候補を作る例です。`--follow`は複数回指定でき、同じXハンドルは1件に統合されます。`--profile-pattern C108`は表示名・自己紹介にC108があるプロフィールだけを抽出し、`--include-previous-only`は前回リストにしかいない候補も追加します。
+提供済みフォローJSONと前回Notion取得JSONから仮想C109候補を作る例です。`--follow`は複数回指定でき、同じXハンドルの同一訪問は統合されます。同じ作家が複数日・複数配置で参加する場合は、日付と配置が異なる別の巡回行として保持します。`--profile-pattern C108`は表示名・自己紹介にC108があるプロフィールだけを抽出し、表示名からイベント告知部分を除いた作家名候補、日付、ホール、配置を抽出します。`--include-previous-only`は前回リストにしかいない候補も追加します。
 
 ```powershell
 uv run comiket-plan build-next C109 `
@@ -306,11 +306,14 @@ uv run comiket-plan build-next C109 `
   --previous data/raw/notion/c108.json `
   --profile-pattern C108 `
   --include-previous-only `
+  --carry-previous-placement `
   --output data/derived/c109-virtual.json `
   --report data/derived/c109-virtual-report.json
 ```
 
 フォローJSONの`name`は作家名候補です。サークル名は確定扱いにせず、内部JSONでは`circle_name_confirmed: false`、Notionでは空欄＋`サークル名要確認`として扱います。
+
+`--carry-previous-placement`は今回のようにC108を仮想C109として再現するリハーサル専用です。実際の次回イベントでは前回配置を持ち越さず、今回の参加告知または公式データから取得します。日付・配置をマスターに保持し、NotionではマスターViewに加えて1日目・2日目の絞り込みViewを作ります。抽出できない値は推測せず未確認のまま残します。
 
 Notionへの再同期、X API、お品書き、配置図のコマンドは今後追加します。READMEに書かれていても、上の実装済み一覧にないコマンドはまだ利用できません。
 

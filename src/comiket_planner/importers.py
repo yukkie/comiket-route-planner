@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,8 @@ ALIASES = {
     "circle_name": ("circle_name", "サークル名", "circle"),
     "creator_name": ("creator_name", "作家名", "creator", "名前"),
     "space_code": ("space_code", "配置", "space"),
+    "event_day": ("event_day", "日付", "day"),
+    "hall": ("hall", "ホール"),
     "priority": ("priority", "優先度"),
     "genre_short": ("genre_short", "一言ジャンル", "ジャンル"),
     "notes": ("notes", "メモ", "備考"),
@@ -60,6 +63,46 @@ def _row_handle(row: dict[str, Any]) -> str | None:
     return None
 
 
+def parse_profile_event_fields(display_name: str, event_pattern: str | None) -> dict[str, Any]:
+    """Extract conservative event metadata while preserving the raw display name."""
+    cleaned = display_name.strip()
+    event_text = display_name
+    if event_pattern:
+        marker = re.search(rf"(?:コミケ\s*)?(?:{event_pattern})", display_name, re.IGNORECASE)
+        if marker:
+            cleaned = display_name[:marker.start()].rstrip(" @　【[(（") or display_name.strip()
+            event_text = display_name[marker.start():]
+    event_text = unicodedata.normalize("NFKC", event_text)
+
+    day: int | None = None
+    if re.search(r"(?:1日目|一日目|初日|土曜日?|[（(]土[)）])", event_text):
+        day = 1
+    elif re.search(r"(?:2日目|二日目|日曜日?|[（(]日[)）])", event_text):
+        day = 2
+
+    hall_match = re.search(r"(東|西|南)\s*([1-8])(?:\s*ホール)?", event_text)
+    hall = f"{hall_match.group(1)}{hall_match.group(2)}" if hall_match else None
+
+    space = None
+    sided = re.search(r"([ァ-ヶぁ-んA-Za-z])\s*[-－ー]?\s*(\d{1,2})\s*[-－ー]?\s*([abAB]{1,2})", event_text)
+    if sided:
+        space = f"{sided.group(1)}-{sided.group(2)}{sided.group(3).lower()}"
+    else:
+        no_side = re.search(r"(?:東|西|南)(?:\s*[1-8])?\s*([ァ-ヶぁ-んA-Za-z])\s*[-－ー]?\s*(\d{2})(?!\d)", event_text)
+        if no_side:
+            space = f"{no_side.group(1)}-{no_side.group(2)}"
+    return {"creator_name": cleaned, "event_day": day, "hall": hall, "space_code": space}
+
+
+def normalize_event_day(value: Any) -> int | None:
+    text = unicodedata.normalize("NFKC", str(value or "")).strip()
+    if text in {"1", "1日目", "一日目", "初日"}:
+        return 1
+    if text in {"2", "2日目", "二日目"}:
+        return 2
+    return None
+
+
 def import_previous(path: str | Path, event_id: str) -> list[dict[str, Any]]:
     target = Path(path)
     if target.suffix.lower() == ".json":
@@ -79,9 +122,11 @@ def import_previous(path: str | Path, event_id: str) -> list[dict[str, Any]]:
         creator = str(_value(row, "creator_name", "")).strip() or None
         name = str(_value(row, "circle_name", creator or "unknown")).strip() or creator or "unknown"
         handle = _row_handle(row)
-        key = (handle or name).casefold()
+        event_day = normalize_event_day(_value(row, "event_day", None))
+        space_code = str(_value(row, "space_code", "")).strip() or None
+        key = "\x1f".join((handle or name, str(event_day or ""), space_code or "")).casefold()
         if key not in by_key:
-            visit_id = row.get("visit_id") or stable_id(event_id, handle, name)
+            visit_id = row.get("visit_id") or stable_id(event_id, handle, name, event_day, space_code)
             circle = {
                 "visit_id": visit_id,
                 "circle_name": name,
@@ -89,8 +134,9 @@ def import_previous(path: str | Path, event_id: str) -> list[dict[str, Any]]:
                 "aliases": list(row.get("aliases", [])),
                 "x_user_id": row.get("x_user_id"),
                 "x_handle": handle,
-                "space_code": str(_value(row, "space_code", "")).strip() or None,
-                "hall": row.get("hall"),
+                "space_code": space_code,
+                "hall": str(_value(row, "hall", "")).strip() or None,
+                "event_day": event_day,
                 "placement_type": row.get("placement_type", "unknown"),
                 "priority": PRIORITY_VALUES.get(str(_value(row, "priority", "unassigned")), str(_value(row, "priority", "unassigned"))),
                 "genre_short": str(_value(row, "genre_short", "")).strip(),
@@ -166,7 +212,9 @@ def import_follow_lists(
                     circle["source_refs"].append(ref)
                 circle.setdefault("follow_source_files", []).append(path.name)
                 continue
-            creator_name = str(value.get("name") or x_handle).strip()
+            display_name = str(value.get("name") or x_handle).strip()
+            parsed = parse_profile_event_fields(display_name, profile_pattern)
+            creator_name = parsed["creator_name"]
             by_handle[key] = {
                 "visit_id": stable_id(event_id, "x_handle", key),
                 "circle_name": creator_name,
@@ -175,8 +223,9 @@ def import_follow_lists(
                 "x_user_id": None,
                 "x_handle": x_handle,
                 "x_url": str(value.get("url") or f"https://x.com/{x_handle}"),
-                "space_code": None,
-                "hall": None,
+                "space_code": parsed["space_code"],
+                "hall": parsed["hall"],
+                "event_day": parsed["event_day"],
                 "placement_type": "unknown",
                 "priority": "unassigned",
                 "genre_short": "",
@@ -184,6 +233,7 @@ def import_follow_lists(
                 "notes": "",
                 "items": [],
                 "profile_description": str(value.get("desc") or ""),
+                "x_display_name": display_name,
                 "profile_image_url": value.get("img"),
                 "circle_name_confirmed": False,
                 "follow_source_files": [path.name],
@@ -205,20 +255,32 @@ def import_follow_lists(
 def enrich_with_previous(
     candidates: list[dict[str, Any]],
     previous: list[dict[str, Any]],
+    carry_placement: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Carry only user-authored priority and short genre across events."""
     by_handle = {str(circle.get("x_handle") or "").casefold(): circle for circle in candidates if circle.get("x_handle")}
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for circle in candidates:
+        name_key = str(circle.get("creator_name") or "").strip().casefold()
+        if name_key:
+            by_name.setdefault(name_key, []).append(circle)
     matched_handles: set[str] = set()
     unmatched: list[dict[str, Any]] = []
     conflicts: list[dict[str, Any]] = []
     enriched_fields = 0
     for old in previous:
         key = str(old.get("x_handle") or "").casefold()
-        if not key or key not in by_handle:
+        current = by_handle.get(key) if key else None
+        if current is None and not key:
+            name_key = str(old.get("creator_name") or old.get("circle_name") or "").strip().casefold()
+            name_matches = by_name.get(name_key, [])
+            if len(name_matches) == 1:
+                current = name_matches[0]
+                key = f"name:{name_key}"
+        if current is None:
             unmatched.append({"creator_name": old.get("creator_name") or old.get("circle_name"), "x_handle": old.get("x_handle")})
             continue
         matched_handles.add(key)
-        current = by_handle[key]
         for field in ("priority", "genre_short"):
             value = old.get(field)
             if value in (None, "", "unassigned"):
@@ -235,6 +297,16 @@ def enrich_with_previous(
                 "updated_at": now_iso(),
             }
             enriched_fields += 1
+        if carry_placement:
+            for field in ("event_day", "hall", "space_code"):
+                if current.get(field) in (None, "") and old.get(field) not in (None, ""):
+                    current[field] = old[field]
+                    current.setdefault("field_meta", {})[field] = {
+                        "origin": "previous_list_rehearsal",
+                        "confidence": 1.0,
+                        "manually_confirmed": False,
+                        "updated_at": now_iso(),
+                    }
         current.setdefault("previous_event_refs", []).extend(old.get("source_refs", []))
     return candidates, {
         "previous_records": len(previous),
@@ -249,19 +321,30 @@ def append_previous_only(
     candidates: list[dict[str, Any]],
     previous: list[dict[str, Any]],
     event_id: str,
+    carry_placement: bool = False,
 ) -> tuple[list[dict[str, Any]], int]:
     """Append previous-list entries missing from the filtered follow candidates."""
-    handles = {str(circle.get("x_handle") or "").casefold() for circle in candidates if circle.get("x_handle")}
-    names = {str(circle.get("creator_name") or "").strip().casefold() for circle in candidates if circle.get("creator_name")}
+    def identity_keys(circle: dict[str, Any]) -> set[tuple[str, int | None, str]]:
+        handle = str(circle.get("x_handle") or "").casefold()
+        creator = str(circle.get("creator_name") or circle.get("circle_name") or "").strip().casefold()
+        day = normalize_event_day(circle.get("event_day")) if carry_placement else None
+        space = re.sub(r"[ab]+$", "", str(circle.get("space_code") or "").casefold()) if carry_placement else ""
+        keys = {(f"name:{creator}", day, space)} if creator else set()
+        if handle:
+            keys.add((handle, day, space))
+        return keys
+
+    identities = {key for circle in candidates for key in identity_keys(circle)}
     added = 0
     for old in previous:
         creator = str(old.get("creator_name") or old.get("circle_name") or "").strip()
         handle = normalize_x_handle(old.get("x_handle"))
         if not creator or creator == "unknown":
             continue
-        if (handle and handle.casefold() in handles) or creator.casefold() in names:
+        old_identities = identity_keys(old)
+        if old_identities & identities:
             continue
-        key = handle.casefold() if handle else creator.casefold()
+        key = "\x1f".join(str(part or "") for part in sorted(old_identities)[0])
         candidates.append({
             "visit_id": stable_id(event_id, "previous", key),
             "circle_name": creator,
@@ -270,8 +353,9 @@ def append_previous_only(
             "x_user_id": None,
             "x_handle": handle,
             "x_url": f"https://x.com/{handle}" if handle else None,
-            "space_code": None,
-            "hall": None,
+            "space_code": old.get("space_code") if carry_placement else None,
+            "hall": old.get("hall") if carry_placement else None,
+            "event_day": normalize_event_day(old.get("event_day")) if carry_placement else None,
             "placement_type": "unknown",
             "priority": old.get("priority", "unassigned"),
             "genre_short": old.get("genre_short", ""),
@@ -287,8 +371,6 @@ def append_previous_only(
             },
             "source_refs": list(old.get("source_refs", [])),
         })
-        if handle:
-            handles.add(handle.casefold())
-        names.add(creator.casefold())
+        identities.update(old_identities)
         added += 1
     return candidates, added

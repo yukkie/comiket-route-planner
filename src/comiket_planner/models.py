@@ -37,6 +37,9 @@ class CircleVisit(PlannerModel):
     aliases: list[str] = Field(default_factory=list)
     x_user_id: str | None = None
     x_handle: str | None = None
+    x_url: str | None = None
+    x_display_name: str | None = None
+    event_day: int | None = Field(default=None, ge=1, le=2)
     space_code: str | None = None
     hall: str | None = None
     placement_type: Literal["shutter_front", "wall", "island_end", "island", "unknown"]
@@ -47,6 +50,7 @@ class CircleVisit(PlannerModel):
     items: list[PurchaseItem] = Field(default_factory=list)
     field_meta: dict[str, Any] = Field(default_factory=dict)
     source_refs: list[dict[str, Any]] = Field(default_factory=list)
+    circle_name_confirmed: bool = False
 
 
 class Budget(PlannerModel):
